@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Inovare Games</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Inovare Games — независимый разработчик мобильных игр">
+    <meta name="author" content="Inovare Games">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0e0e13;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 50px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #4f46e5, #1e1b4b);
+        }
+
+        header img {
+            width: 96px;
+            height: 96px;
+            margin-bottom: 15px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            margin-top: 8px;
+            opacity: 0.85;
+        }
+
+        main {
+            max-width: 900px;
+            margin: auto;
+            padding: 30px 16px;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            color: #a5b4fc;
+            margin-bottom: 15px;
+        }
+
+        .games {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .game {
+            background: #1a1a25;
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .game img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .game a {
+            display: inline-block;
+            margin-top: 8px;
+            color: #a5b4fc;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #0b0b10;
+            opacity: 0.7;
+        }
+
+        /* 📱 Mobile */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <!-- ЗАМЕНИ logo.png НА СВОЙ ЛОГОТИП -->
+    <img src="https://via.placeholder.com/96x96?text=LOGO" alt="Inovare Games Logo">
+    <h1>Inovare Games</h1>
+    <p>Независимый разработчик мобильных игр</p>
+</header>
+
+<main>
+
+    <section>
+        <h2>Игры</h2>
+
+        <div class="games">
+
+            <div class="game">
+                <!-- СКРИНШОТ ИГРЫ -->
+                <img src="https://via.placeholder.com/600x340?text=Murino" alt="Мурино">
+                <h3>Мурино</h3>
+                <p>Атмосферная мобильная игра.</p>
+                <a href="https://play.google.com/store/apps/details?id=com.InovareGames.Murino" target="_blank">
+                    Google Play →
+                </a>
+            </div>
+
+            <div class="game">
+                <img src="https://via.placeholder.com/600x340?text=Celo+Molocnoe" alt="Село Молочное">
+                <h3>Село Молочное</h3>
+                <p>Спокойный геймплей и сельская атмосфера.</p>
+                <a href="https://play.google.com/store/apps/details?id=com.InovareGames.CeloMolochnoe" target="_blank">
+                    Google Play →
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="privacy">
+        <h2>Privacy Policy</h2>
+
+        <p>
+            Inovare Games respects users’ privacy.
+            This Privacy Policy explains how information is handled in our mobile applications.
+        </p>
+
+        <p>
+            <strong>Data collection:</strong><br>
+            Our games do not collect personal data directly.
+            Some third-party services (such as Google Play Services or AdMob) may collect data
+            required for analytics or advertising in accordance with their own privacy policies.
+        </p>
+
+        <p>
+            <strong>Advertising:</strong><br>
+            Ads may be shown in our games. Advertising partners may use device identifiers
+            to serve relevant ads.
+        </p>
+
+        <p>
+            <strong>Children:</strong><br>
+            Our games are not intended to knowingly collect data from children under 13.
+        </p>
+
+        <p>
+            <strong>Contact:</strong><br>
+            If you have questions about this Privacy Policy, contact us at:<br>
+            📧 <a href="mailto:kola77173@gmail.com">kola77173@gmail.com</a>
+        </p>
+    </section>
+
+</main>
+
+<footer>
+    © 2026 Inovare Games
+</footer>
+
+</body>
+</html>
