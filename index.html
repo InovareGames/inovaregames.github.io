@@ -1,179 +1,737 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Inovare Games</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inovare Games — архитектура и игры</title>
+<style>
+    /* ===== GAMER TRANSITION ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap');
 
-    <meta name="description" content="Inovare Games — независимый разработчик мобильных игр">
-    <meta name="author" content="Inovare Games">
+    :root {
+        --bg-dark: #030308;
+        --bg-panel: #0a0a1a;
+        --primary: #3A35FF;
+        --secondary: #00D4FF;
+        --accent: #FF007A;
+        --text-main: #FFFFFF;
+        --text-muted: #8A8D93;
+    }
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Montserrat', sans-serif;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #0e0e13;
-            color: #ffffff;
-            line-height: 1.6;
-        }
+    body, html {
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+    }
 
-        header {
-            padding: 50px 20px;
-            text-align: center;
-            background: linear-gradient(135deg, #4f46e5, #1e1b4b);
-        }
+    /* ===== канвас и 3D ===== */
+    #bg-canvas, #click-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 0;
+    }
+    #click-canvas {
+        z-index: 9999;
+    }
 
-        header img {
-            width: 96px;
-            height: 96px;
-            margin-bottom: 15px;
-        }
+    #cube-container {
+        position: fixed;
+        top: 50%;
+        right: 10%;
+        width: 200px;
+        height: 200px;
+        transform: translateY(-50%);
+        perspective: 1000px;
+        z-index: 1;
+        pointer-events: none;
+    }
 
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
+    .cube {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+    }
 
-        header p {
-            margin-top: 8px;
-            opacity: 0.85;
-        }
+    .cube-face {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background: rgba(10, 10, 26, 0.6);
+        border: 2px solid var(--primary);
+        box-shadow: 0 0 20px rgba(58, 53, 255, 0.4) inset;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 900;
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(5px);
+    }
 
-        main {
-            max-width: 900px;
-            margin: auto;
-            padding: 30px 16px;
-        }
+    .face-front  { transform: rotateY(0deg) translateZ(100px); }
+    .face-back   { transform: rotateY(180deg) translateZ(100px); }
+    .face-right  { transform: rotateY(90deg) translateZ(100px); }
+    .face-left   { transform: rotateY(-90deg) translateZ(100px); }
+    .face-top    { transform: rotateX(90deg) translateZ(100px); }
+    .face-bottom { transform: rotateX(-90deg) translateZ(100px); }
 
-        section {
-            margin-bottom: 50px;
-        }
+    /* ===== навигация ===== */
+    nav {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        padding: 15px 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(3, 3, 8, 0.85);
+        backdrop-filter: blur(12px);
+        z-index: 1000;
+        border-bottom: 1px solid rgba(58, 53, 255, 0.2);
+    }
 
-        h2 {
-            color: #a5b4fc;
-            margin-bottom: 15px;
-        }
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-        .games {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-        }
+    .brand img {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px var(--primary);
+    }
 
-        .game {
-            background: #1a1a25;
-            padding: 20px;
-            border-radius: 14px;
-        }
+    .brand span {
+        font-weight: 900;
+        font-size: 1.4rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-        .game img {
-            width: 100%;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
+    .nav-links {
+        display: flex;
+        gap: 30px;
+    }
 
-        .game a {
-            display: inline-block;
-            margin-top: 8px;
-            color: #a5b4fc;
-            font-weight: bold;
-        }
+    .nav-links a {
+        color: var(--text-main);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
 
-        footer {
-            text-align: center;
-            padding: 20px;
-            background: #0b0b10;
-            opacity: 0.7;
-        }
+    .nav-links a:hover {
+        color: var(--secondary);
+    }
 
-        /* 📱 Mobile */
-        @media (max-width: 600px) {
-            header h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
+    /* ===== секции ===== */
+    section {
+        padding: 150px 5vw 100px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .parallax-layer {
+        transition: transform 0.1s ease-out;
+    }
+
+    h1, h2, h3 {
+        text-transform: uppercase;
+    }
+
+    .hero-title {
+        font-size: 5vw;
+        font-weight: 900;
+        background: linear-gradient(90deg, var(--text-main), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin-bottom: 40px;
+    }
+
+    .btn {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-main);
+        background: linear-gradient(45deg, var(--primary), var(--secondary));
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: inline-block;
+        width: fit-content;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    }
+
+    /* ===== параллелограмм (теперь ссылка на Telegram) ===== */
+    .parallelogram-container {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 80px 0;
+        perspective: 1000px;
+    }
+
+    .parallelogram {
+        width: 400px;
+        height: 120px;
+        background: linear-gradient(120deg, rgba(58,53,255,0.8), rgba(0,212,255,0.8), rgba(255,0,122,0.8), rgba(58,53,255,0.8));
+        background-size: 300% 300%;
+        transform: skewX(-20deg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        transition: transform 0.1s;
+        animation: gradientFlow 6s ease infinite;
+    }
+
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .parallelogram::before {
+        content: '';
+        position: absolute;
+        top: -2px; left: -2px; right: -2px; bottom: -2px;
+        background: linear-gradient(120deg, var(--primary), var(--secondary), var(--accent));
+        z-index: -1;
+        transform: skewX(0deg);
+        filter: blur(15px);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .parallelogram:hover::before {
+        opacity: 1;
+    }
+
+    .parallelogram-content {
+        transform: skewX(20deg);
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--text-main);
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        pointer-events: none;
+    }
+
+    /* ===== сетка карточек (игровые проекты) ===== */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 50px;
+        max-width: 70%;
+    }
+
+    .card {
+        background: var(--bg-panel);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 40px;
+        border-radius: 12px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .card::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(0, 212, 255, 0.15), transparent 80%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary);
+        box-shadow: 0 15px 40px rgba(58, 53, 255, 0.2);
+    }
+
+    .card:hover::after {
+        opacity: 1;
+    }
+
+    .card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: var(--secondary);
+    }
+
+    /* === лейбл PLAY === */
+    .launch-label {
+        margin-top: 20px;
+        font-weight: 900;
+        color: #FF007A;
+        letter-spacing: 2px;
+        opacity: 0;
+        transition: 0.3s;
+    }
+
+    .card:hover .launch-label {
+        opacity: 1;
+    }
+
+    /* ===== статистика ===== */
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        background: linear-gradient(90deg, var(--bg-panel), rgba(58, 53, 255, 0.1));
+        padding: 50px 0;
+        border-radius: 12px;
+        margin-top: 50px;
+        max-width: 70%;
+    }
+
+    .stat-item {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 900;
+        color: var(--secondary);
+        line-height: 1.2;
+    }
+
+    .stat-plus {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--secondary);
+        margin-left: 4px;
+    }
+
+    /* ===== анимация появления ===== */
+    .reveal {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.8s ease-out;
+    }
+
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ===== ГЕЙМЕРСКИЙ ОВЕРЛЕЙ ===== */
+    #game-transition {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at center, #030308 0%, #000 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 20000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+
+    #game-transition.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .glitch-text {
+        font-size: 3rem;
+        font-weight: 900;
+        color: #00D4FF;
+        text-shadow:
+            2px 0 #FF007A,
+            -2px 0 #3A35FF;
+        animation: glitch 0.15s infinite alternate;
+        letter-spacing: 4px;
+    }
+
+    @keyframes glitch {
+        from { transform: translateX(-2px); }
+        to { transform: translateX(2px); }
+    }
+
+    .scanlines {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.03) 0px,
+            rgba(255,255,255,0.03) 1px,
+            transparent 2px,
+            transparent 4px
+        );
+        pointer-events: none;
+    }
+</style>
 </head>
 <body>
 
-<header>
-    <!-- ЗАМЕНИ logo.png НА СВОЙ ЛОГОТИП -->
-    <img src="https://via.placeholder.com/96x96?text=LOGO" alt="Inovare Games Logo">
-    <h1>Inovare Games</h1>
-    <p>Независимый разработчик мобильных игр</p>
-</header>
+<!-- Фоновые канвасы и 3D-куб -->
+<canvas id="bg-canvas"></canvas>
+<canvas id="click-canvas"></canvas>
 
-<main>
+<div id="cube-container">
+    <div class="cube" id="cube">
+        <div class="cube-face face-front">IG</div>
+        <div class="cube-face face-back">IG</div>
+        <div class="cube-face face-right">DEV</div>
+        <div class="cube-face face-left">DEV</div>
+        <div class="cube-face face-top">API</div>
+        <div class="cube-face face-bottom">DB</div>
+    </div>
+</div>
 
-    <section>
-        <h2>Игры</h2>
+<!-- Навигация -->
+<nav>
+    <div class="brand">
+        <img src="изображение.png" alt="Inovare Games" onerror="this.style.display='none'">
+        <span>Inovare Games</span>
+    </div>
+    <div class="nav-links">
+        <a href="#about" class="interactive-btn">Главная</a>
+        <a href="#component" class="interactive-btn">Сообщество</a>
+        <a href="#projects" class="interactive-btn">Наши игры</a>
+    </div>
+</nav>
 
-        <div class="games">
+<!-- Секция about -->
+<section id="about">
+    <div class="parallax-layer" data-speed="0.2">
+        <h1 class="hero-title reveal">Разработка игр <br>в которые хотят играть</h1>
+        <p class="hero-subtitle reveal">Молодой белорусский разработчик, который сделал «Мурино» и «Село Молочное». Создаём самые смелые игры, мемы и вообще всё то, чего хотите именно Вы!</p>
+        <!-- Кнопка теперь содержит data-link для перехода в профиль разработчика -->
+        <button class="btn interactive-btn reveal" data-link="https://play.google.com/store/apps/dev?id=6087215676671729050">Профиль разработчика</button>
+    </div>
 
-            <div class="game">
-                <!-- СКРИНШОТ ИГРЫ -->
-                <img src="https://via.placeholder.com/600x340?text=Murino" alt="Мурино">
-                <h3>Мурино</h3>
-                <p>Атмосферная мобильная игра.</p>
-                <a href="https://play.google.com/store/apps/details?id=com.InovareGames.Murino" target="_blank">
-                    Google Play →
-                </a>
-            </div>
-
-            <div class="game">
-                <img src="https://via.placeholder.com/600x340?text=Celo+Molocnoe" alt="Село Молочное">
-                <h3>Село Молочное</h3>
-                <p>Спокойный геймплей и сельская атмосфера.</p>
-                <a href="https://play.google.com/store/apps/details?id=com.InovareGames.CeloMolochnoe" target="_blank">
-                    Google Play →
-                </a>
-            </div>
-
+    <div class="stats-container reveal parallax-layer" data-speed="0.1">
+        <div class="stat-item">
+            <div class="stat-number" data-target="99.9">0</div>
+            <div>Успешных запусков (%)</div>
         </div>
-    </section>
+        <div class="stat-item">
+            <div class="stat-number" data-target="20,000">0</div><span class="stat-plus">+</span>
+            <div>Игроков</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="7">0</div>
+            <div>Выпущенных игр</div>
+        </div>
+    </div>
+</section>
 
-    <section id="privacy">
-        <h2>Privacy Policy</h2>
+<!-- Секция с сообществом (параллелограмм ссылка на Telegram) -->
+<section id="component">
+    <div class="parallax-layer" data-speed="0.15">
+        <h2 class="reveal">Сообщество InovareGames</h2>
+        <div class="parallelogram-container reveal">
+            <div class="parallelogram interactive-btn" id="shimmerElement" data-link="https://t.me/+CCf1fwMjUtA1YzAy">
+                <span class="parallelogram-content">Сообщество Inovare</span>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <p>
-            Inovare Games respects users’ privacy.
-            This Privacy Policy explains how information is handled in our mobile applications.
-        </p>
+<!-- Секция проектов (игровые карточки с data-link) -->
+<section id="projects">
+    <div class="parallax-layer" data-speed="0.25">
+        <h2 class="reveal">Главные проекты</h2>
+        <div class="grid">
+            <!-- карточка Мурино -->
+            <div class="card interactive-btn reveal game-card"
+                 data-link="https://play.google.com/store/apps/details?id=com.InovareGames.Murino">
+                <h3>МУРИНО</h3>
+                <p>Хоррор-экшен с атмосферой отчаяния и потерянности, но с надеждой на будущее.</p>
+                <div class="launch-label">▶ PLAY</div>
+            </div>
+            <!-- карточка Село Молочное -->
+            <div class="card interactive-btn reveal game-card"
+                 data-link="https://play.google.com/store/apps/details?id=com.InovareGames.CeloMolochnoe">
+                <h3>СЕЛО МОЛОЧНОЕ</h3>
+                <p>Квест-survival с нелинейным сюжетом и динамическими событиями, с вашими любимыми героями мемов.</p>
+                <div class="launch-label">▶ PLAY</div>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <p>
-            <strong>Data collection:</strong><br>
-            Our games do not collect personal data directly.
-            Some third-party services (such as Google Play Services or AdMob) may collect data
-            required for analytics or advertising in accordance with their own privacy policies.
-        </p>
+<!-- ГЕЙМЕРСКИЙ ОВЕРЛЕЙ -->
+<div id="game-transition">
+    <div class="scanlines"></div>
+    <div class="glitch-text">Загрузка...</div>
+</div>
 
-        <p>
-            <strong>Advertising:</strong><br>
-            Ads may be shown in our games. Advertising partners may use device identifiers
-            to serve relevant ads.
-        </p>
+<!-- ОСНОВНОЙ СКРИПТ (с учётом исправлений статистики) -->
+<script>
+    // ==== ИНИЦИАЛИЗАЦИЯ КАНВАСОВ И ЧАСТИЦ ====
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const clickCanvas = document.getElementById('click-canvas');
+    const clickCtx = clickCanvas.getContext('2d');
 
-        <p>
-            <strong>Children:</strong><br>
-            Our games are not intended to knowingly collect data from children under 13.
-        </p>
+    let width, height;
 
-        <p>
-            <strong>Contact:</strong><br>
-            If you have questions about this Privacy Policy, contact us at:<br>
-            📧 <a href="mailto:kola77173@gmail.com">kola77173@gmail.com</a>
-        </p>
-    </section>
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        bgCanvas.width = width;
+        bgCanvas.height = height;
+        clickCanvas.width = width;
+        clickCanvas.height = height;
+    }
 
-</main>
+    window.addEventListener('resize', resize);
+    resize();
 
-<footer>
-    © 2026 Inovare Games
-</footer>
+    // Фоновые частицы
+    const bgParticles = [];
+    const particleCount = 100;
+
+    for (let i = 0; i < particleCount; i++) {
+        bgParticles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 2 + 0.5,
+            dx: (Math.random() - 0.5) * 0.5,
+            dy: (Math.random() - 0.5) * 0.5,
+            color: Math.random() > 0.5 ? '#3A35FF' : '#00D4FF'
+        });
+    }
+
+    function drawBgParticles() {
+        bgCtx.clearRect(0, 0, width, height);
+        bgParticles.forEach(p => {
+            bgCtx.beginPath();
+            bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            bgCtx.fillStyle = p.color;
+            bgCtx.fill();
+            p.x += p.dx;
+            p.y += p.dy;
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
+        });
+    }
+
+    // Частицы от кликов
+    const clickParticles = [];
+
+    function createClickParticles(x, y) {
+        const amount = 30;
+        for (let i = 0; i < amount; i++) {
+            clickParticles.push({
+                x: x,
+                y: y,
+                r: Math.random() * 3 + 1,
+                dx: (Math.random() - 0.5) * 10,
+                dy: (Math.random() - 0.5) * 10,
+                life: 1,
+                decay: Math.random() * 0.02 + 0.01,
+                color: Math.random() > 0.5 ? '#FF007A' : '#00D4FF'
+            });
+        }
+    }
+
+    function drawClickParticles() {
+        clickCtx.clearRect(0, 0, width, height);
+        for (let i = clickParticles.length - 1; i >= 0; i--) {
+            const p = clickParticles[i];
+            clickCtx.beginPath();
+            clickCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            let alphaHex = Math.floor(p.life * 255).toString(16).padStart(2, '0');
+            clickCtx.fillStyle = p.color + alphaHex;
+            clickCtx.fill();
+            p.x += p.dx;
+            p.y += p.dy;
+            p.dy += 0.2; // гравитация
+            p.life -= p.decay;
+            if (p.life <= 0) {
+                clickParticles.splice(i, 1);
+            }
+        }
+    }
+
+    function animate() {
+        drawBgParticles();
+        drawClickParticles();
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    // клик по документу создаёт частицы
+    document.addEventListener('click', (e) => {
+        createClickParticles(e.clientX, e.clientY);
+    });
+
+    // интерактивные элементы тоже создают частицы
+    const interactives = document.querySelectorAll('.interactive-btn');
+    interactives.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const rect = btn.getBoundingClientRect();
+            createClickParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        });
+    });
+
+    // ==== 3D КУБ И ПАРАЛЛАКС ====
+    const cube = document.getElementById('cube');
+    const parallaxLayers = document.querySelectorAll('.parallax-layer');
+
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        if (cube) {
+            cube.style.transform = `rotateX(${scrollY * 0.2}deg) rotateY(${scrollY * 0.3}deg)`;
+        }
+        parallaxLayers.forEach(layer => {
+            const speed = layer.getAttribute('data-speed') || 0;
+            const yPos = -(scrollY * speed);
+            layer.style.transform = `translateY(${yPos}px)`;
+        });
+    });
+
+    // ==== REVEAL АНИМАЦИЯ (Intersection Observer) ====
+    const reveals = document.querySelectorAll('.reveal');
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px"
+    };
+
+    const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('active');
+            if (entry.target.classList.contains('stats-container')) {
+                animateNumbers();
+            }
+            observer.unobserve(entry.target);
+        });
+    }, observerOptions);
+
+    reveals.forEach(el => revealOnScroll.observe(el));
+
+    function animateNumbers() {
+        const counters = document.querySelectorAll('.stat-number');
+        counters.forEach(counter => {
+            // Получаем target, удаляем всё кроме цифр и точки
+            let targetRaw = counter.getAttribute('data-target');
+            let target = parseFloat(targetRaw.replace(/[^\d.]/g, ''));
+            if (isNaN(target)) target = 0;
+
+            const updateCount = () => {
+                let count = parseFloat(counter.innerText.replace(/[^\d.]/g, '')) || 0;
+                const inc = target / 200;
+                if (count < target) {
+                    let newVal = count + inc;
+                    // отображаем целое или дробное в зависимости от исходного
+                    if (Number.isInteger(target) && targetRaw.indexOf('.') === -1) {
+                        counter.innerText = Math.ceil(newVal);
+                    } else {
+                        counter.innerText = newVal.toFixed(1);
+                    }
+                    setTimeout(updateCount, 10);
+                } else {
+                    counter.innerText = targetRaw; // возвращаем исходный формат (например 99.9)
+                }
+            };
+            updateCount();
+        });
+    }
+
+    // ==== ЭФФЕКТЫ ДЛЯ ПАРАЛЛЕЛОГРАММА ====
+    const parallelogram = document.getElementById('shimmerElement');
+    if (parallelogram) {
+        parallelogram.addEventListener('mousemove', (e) => {
+            const rect = parallelogram.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -15;
+            const rotateY = ((x - centerX) / centerX) * 15;
+            parallelogram.style.transform = `skewX(-20deg) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+        parallelogram.addEventListener('mouseleave', () => {
+            parallelogram.style.transform = `skewX(-20deg) perspective(1000px) rotateX(0) rotateY(0)`;
+        });
+    }
+
+    // ==== ХОВЕР-ЭФФЕКТ ДЛЯ КАРТОЧЕК (позиция мыши) ====
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+            card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+        });
+    });
+
+    // ===== ГЕЙМЕРСКИЙ ПЕРЕХОД для всех элементов с data-link =====
+    const transition = document.getElementById('game-transition');
+
+    document.querySelectorAll('[data-link]').forEach(card => {
+        card.addEventListener('click', function (e) {
+            const link = this.getAttribute('data-link');
+            if (!link) return;
+
+            // добавляем частицы в месте клика
+            const rect = this.getBoundingClientRect();
+            createClickParticles(
+                rect.left + rect.width / 2,
+                rect.top + rect.height / 2
+            );
+
+            // показываем геймерский оверлей
+            transition.classList.add('active');
+
+            // небольшая задержка для атмосферы, затем открываем ссылку
+            setTimeout(() => {
+                window.open(link, "_blank");
+                transition.classList.remove('active');
+            }, 1200);
+        });
+    });
+</script>
 
 </body>
 </html>
