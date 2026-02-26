@@ -32,6 +32,7 @@ lijit.com, 273644, RESELLER, fafdf38b16bf6b2b
 onetag.com, 5d1628750185ace, RESELLER
 bigo.sg, 1114681, RESELLER
 sharethrough.com, 5EQ7ZF1q, RESELLER, d53b998a7bd4ecd2
+yandex.com, 315890499, DIRECT
 pubmatic.com, 156212, RESELLER, 5d62403b186f2ace
 zetaglobal.net, 626, RESELLER
 adagio.io, 1546, RESELLER
@@ -45,6 +46,7 @@ appnexus.com, 12622, RESELLER
 trustedstack.com, TS677PGY3, RESELLER
 blueseasx.com, 203620, RESELLER, 7998eac5087f6110
 ignitemediatech.com, pub_61317, RESELLER
+yango-ads.com, 315890499, DIRECT
 kidoz.net, 15614, RESELLER, a109366414b7335e
 video.unrulymedia.com, 2444764291, RESELLER
 triplelift.com, 13423, RESELLER, 6c33edb13117fd86
