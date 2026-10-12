@@ -1,4 +1,5 @@
 google.com, pub-8355391712507431, DIRECT, f08c47fec0942fa0
+ca-app-pub-8355391712507431~4851460201
 smartclip.net, 15458, RESELLER
 pubmatic.com, 166078, RESELLER, 5d62403b186f2ace
 instreamatic.com, 118, RESELLER
